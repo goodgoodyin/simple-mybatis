@@ -3,8 +3,11 @@ package com.goodyin.mybatis.binding;
 import com.goodyin.mybatis.session.SqlSession;
 
 import java.lang.reflect.Proxy;
-import java.util.Map;
 
+/**
+ * 代理工厂, 代理SqlSession类
+ * @param <T>
+ */
 public class MapperProxyFactory<T> {
     private final Class<T> mapperInterface;
 

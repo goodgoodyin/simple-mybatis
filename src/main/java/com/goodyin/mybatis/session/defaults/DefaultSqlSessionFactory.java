@@ -4,8 +4,6 @@ import com.goodyin.mybatis.binding.MapperRegistry;
 import com.goodyin.mybatis.session.SqlSession;
 import com.goodyin.mybatis.session.SqlSessionFactory;
 
-import java.lang.reflect.Proxy;
-
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
     private final MapperRegistry mapperRegistry;

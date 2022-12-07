@@ -47,7 +47,6 @@ public class MapperRegistry {
         for (Class<?> mapperClass : mapperSet) {
             addMapper(mapperClass);
         }
-
     }
 
 
