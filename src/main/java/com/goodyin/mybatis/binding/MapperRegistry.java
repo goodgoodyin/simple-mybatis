@@ -1,6 +1,7 @@
 package com.goodyin.mybatis.binding;
 
 import cn.hutool.core.lang.ClassScanner;
+import com.goodyin.mybatis.session.Configuration;
 import com.goodyin.mybatis.session.SqlSession;
 
 import java.util.HashMap;
@@ -11,6 +12,12 @@ import java.util.Set;
  * 映射器注册机
  */
 public class MapperRegistry {
+
+    private Configuration configuration;
+
+    public MapperRegistry(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     // 所有映射器代理
     private final Map<Class<?>, MapperProxyFactory<?>> knowMappers = new HashMap<>();

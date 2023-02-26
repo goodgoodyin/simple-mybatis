@@ -1,6 +1,7 @@
 package com.goodyin.mybatis.session.defaults;
 
 import com.goodyin.mybatis.binding.MapperRegistry;
+import com.goodyin.mybatis.session.Configuration;
 import com.goodyin.mybatis.session.SqlSession;
 
 /**
@@ -8,10 +9,10 @@ import com.goodyin.mybatis.session.SqlSession;
  */
 public class DefaultSqlSession implements SqlSession {
 
-    private MapperRegistry mapperRegistry;
+    private Configuration configuration;
 
-    public DefaultSqlSession(MapperRegistry mapperRegistry) {
-        this.mapperRegistry = mapperRegistry;
+    public DefaultSqlSession(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     @Override
@@ -26,6 +27,6 @@ public class DefaultSqlSession implements SqlSession {
 
     @Override
     public <T> T getMapper(Class<T> type) {
-        return mapperRegistry.getMapper(type, this);
+        return configuration.getMapper(type, this);
     }
 }
