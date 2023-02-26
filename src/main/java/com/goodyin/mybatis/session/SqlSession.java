@@ -9,5 +9,17 @@ public interface SqlSession {
 
     <T> T selectOne(String statement, Object param);
 
+    /**
+     * 获取映射器
+     * @param type
+     * @param <T>
+     * @return
+     */
     <T> T getMapper(Class<T> type);
+
+    /**
+     * 获取配置
+     * @return
+     */
+    Configuration getConfiguration();
 }
