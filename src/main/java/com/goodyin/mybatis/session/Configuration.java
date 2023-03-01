@@ -1,7 +1,11 @@
 package com.goodyin.mybatis.session;
 
 import com.goodyin.mybatis.binding.MapperRegistry;
+import com.goodyin.mybatis.datasource.druid.DruidDataSourceFactory;
+import com.goodyin.mybatis.mapping.Environment;
 import com.goodyin.mybatis.mapping.MappedStatement;
+import com.goodyin.mybatis.transaction.jdbc.JdbcTransactionFactory;
+import com.goodyin.mybatis.type.TypeAliasRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +14,9 @@ import java.util.Map;
  * 配置项
  */
 public class Configuration {
+
+    // 环境
+    private Environment environment;
 
     /**
      * 映射注册机
@@ -20,6 +27,13 @@ public class Configuration {
      * 映射语句Map
      */
     protected final Map<String, MappedStatement> mappedStatements = new HashMap<>();
+
+    protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+
+    public Configuration() {
+        typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
+        typeAliasRegistry.registerAlias("DRUID", DruidDataSourceFactory.class);
+    }
 
     public void addMappers(String packageName) {
         mapperRegistry.addMappers(packageName);
@@ -45,5 +59,16 @@ public class Configuration {
         return mappedStatements.get(id);
     }
 
+    public TypeAliasRegistry getTypeAliasRegistry() {
+        return typeAliasRegistry;
+    }
 
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    public Configuration setEnvironment(Environment environment) {
+        this.environment = environment;
+        return this;
+    }
 }

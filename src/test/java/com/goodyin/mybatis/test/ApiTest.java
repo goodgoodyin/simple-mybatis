@@ -8,6 +8,7 @@ import com.goodyin.mybatis.session.SqlSessionFactory;
 import com.goodyin.mybatis.session.SqlSessionFactoryBuilder;
 import com.goodyin.mybatis.session.defaults.DefaultSqlSessionFactory;
 import com.goodyin.mybatis.test.dao.IUserDao;
+import com.goodyin.mybatis.test.po.User;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,8 @@ public class ApiTest {
 //    }
 
     /**
-     * 工厂模式代理解析注册XML
+     *  1。工厂模式代理解析注册XML
+     *  2。连接数据源查询,参数解析
      * @throws IOException
      */
     @Test
@@ -64,7 +66,7 @@ public class ApiTest {
         // 1 从xml获取SqlSession
         // 读取xml资源
         Reader reader = Resources.getResourceAsReader("mybatis-config-datasource.xml");
-        // 构建xml，注册xml映射器
+        // 构建xml，注册xml映射器，解析数据库连接
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
         // sqlSession
         SqlSession sqlSession = sqlSessionFactory.openSession();
@@ -73,7 +75,9 @@ public class ApiTest {
         IUserDao userDao = sqlSession.getMapper(IUserDao.class);
 
         // 查询
-        String res = userDao.queryUserInfoById("10001");
+        User res = userDao.queryUserInfoById(1L);
         logger.info("测试结果: {}", res);
     }
+
+
 }

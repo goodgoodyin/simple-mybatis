@@ -1,23 +1,24 @@
 package com.goodyin.mybatis.buidler.xml;
 
 import com.goodyin.mybatis.buidler.BaseBuilder;
+import com.goodyin.mybatis.datasource.druid.DruidDataSourceFactory;
 import com.goodyin.mybatis.io.Resources;
+import com.goodyin.mybatis.mapping.BoundSql;
+import com.goodyin.mybatis.mapping.Environment;
 import com.goodyin.mybatis.mapping.MappedStatement;
 import com.goodyin.mybatis.mapping.SqlCommandType;
 import com.goodyin.mybatis.session.Configuration;
+import com.goodyin.mybatis.transaction.TransactionFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
 
-import javax.annotation.Resource;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +48,8 @@ public class XMLConfigBuilder extends BaseBuilder {
      */
     public Configuration parse() {
         try {
+            // 解析数据库连接环境
+            environmentsElement(root.element("environments"));
             // 解析映射器
             mapperElement(root.element("mappers"));
         } catch (Exception e) {
@@ -54,6 +57,41 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
         return configuration;
 
+    }
+
+    /**
+     * 解析环境参数
+     * @param context
+     */
+    private void environmentsElement(Element context) throws InstantiationException, IllegalAccessException {
+        String environment = context.attributeValue("default");
+
+        List<Element> environmentList = context.elements("environment");
+        for (Element element : environmentList) {
+            String id = element.attributeValue("id");
+            if (environment.equals(id)) {
+                // 事务管理器
+                Element transactionManager = element.element("transactionManager");
+                TransactionFactory transactionFactory = (TransactionFactory)typeAliasRegistry.resolveAlias(transactionManager.attributeValue("type")).newInstance();
+
+                // 数据源
+                Element datasourceElement = element.element("dataSource");
+                DruidDataSourceFactory dataSourceFactory = (DruidDataSourceFactory) typeAliasRegistry.resolveAlias(datasourceElement.attributeValue("type")).newInstance();
+                List<Element> propertyList = datasourceElement.elements("property");
+                Properties properties = new Properties();
+                for (Element property : propertyList) {
+                    properties.setProperty(property.attributeValue("name"), property.attributeValue("value"));
+                }
+                dataSourceFactory.setProperties(properties);
+                DataSource dataSource = dataSourceFactory.getDataSource();
+
+                // 构建环境
+                Environment.Builder environmentBuilder = new Environment.Builder(id)
+                        .transactionFactory(transactionFactory)
+                        .dataSource(dataSource);
+                configuration.setEnvironment(environmentBuilder.build());
+            }
+        }
     }
 
     /**
@@ -94,9 +132,12 @@ public class XMLConfigBuilder extends BaseBuilder {
                 String msId = namespace + "." + id;
                 String nodeName = selectNode.getName();
                 SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ROOT));
+
+                BoundSql boundSql = new BoundSql(sql, parameter, parameterType, resultType);
+
                 MappedStatement mappedStatement = new MappedStatement
-                        .Builder(configuration, msId, sqlCommandType, parameterType, resultType, sql, parameter)
-                        .Builder();
+                        .Builder(configuration, msId, sqlCommandType, boundSql)
+                        .build();
 
                 // 添加解析SQL
                 configuration.addMappedStatement(mappedStatement);

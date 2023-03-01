@@ -5,6 +5,9 @@ import com.goodyin.mybatis.session.defaults.DefaultSqlSessionFactory;
 
 import java.io.Reader;
 
+/**
+ * 构建SqlSessionFactory
+ */
 public class SqlSessionFactoryBuilder {
 
     public SqlSessionFactory build(Reader reader) {
