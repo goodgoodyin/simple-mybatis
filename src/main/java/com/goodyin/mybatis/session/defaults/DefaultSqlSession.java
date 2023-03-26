@@ -1,5 +1,6 @@
 package com.goodyin.mybatis.session.defaults;
 
+import cn.hutool.core.collection.CollUtil;
 import com.goodyin.mybatis.mapping.BoundSql;
 import com.goodyin.mybatis.mapping.Environment;
 import com.goodyin.mybatis.mapping.MappedStatement;
@@ -50,6 +51,9 @@ public class DefaultSqlSession implements SqlSession {
             // 执行sql查询
             ResultSet resultSet = preparedStatement.executeQuery();
             List<T> res = resultSet2Obj(resultSet, Class.forName(boundSql.getResultType()));
+            if (CollUtil.isEmpty(res)) {
+                return null;
+            }
             return res.get(0);
         } catch (Exception e) {
            e.printStackTrace();

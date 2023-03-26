@@ -1,6 +1,7 @@
 package com.goodyin.mybatis.buidler.xml;
 
 import com.goodyin.mybatis.buidler.BaseBuilder;
+import com.goodyin.mybatis.datasource.DataSourceFactory;
 import com.goodyin.mybatis.datasource.druid.DruidDataSourceFactory;
 import com.goodyin.mybatis.io.Resources;
 import com.goodyin.mybatis.mapping.BoundSql;
@@ -76,7 +77,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
                 // 数据源
                 Element datasourceElement = element.element("dataSource");
-                DruidDataSourceFactory dataSourceFactory = (DruidDataSourceFactory) typeAliasRegistry.resolveAlias(datasourceElement.attributeValue("type")).newInstance();
+                DataSourceFactory dataSourceFactory = (DataSourceFactory) typeAliasRegistry.resolveAlias(datasourceElement.attributeValue("type")).newInstance();
                 List<Element> propertyList = datasourceElement.elements("property");
                 Properties properties = new Properties();
                 for (Element property : propertyList) {
