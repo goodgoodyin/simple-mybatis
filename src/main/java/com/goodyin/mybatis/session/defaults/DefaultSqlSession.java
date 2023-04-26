@@ -1,6 +1,7 @@
 package com.goodyin.mybatis.session.defaults;
 
 import cn.hutool.core.collection.CollUtil;
+import com.goodyin.mybatis.executor.Executor;
 import com.goodyin.mybatis.mapping.BoundSql;
 import com.goodyin.mybatis.mapping.Environment;
 import com.goodyin.mybatis.mapping.MappedStatement;
@@ -20,13 +21,17 @@ public class DefaultSqlSession implements SqlSession {
 
     private Configuration configuration;
 
-    public DefaultSqlSession(Configuration configuration) {
+    private Executor executor;
+
+    public DefaultSqlSession(Configuration configuration, Executor executor) {
         this.configuration = configuration;
+        this.executor = executor;
     }
 
     @Override
     public <T> T selectOne(String statement) {
-        return (T)("你被代理了!" + statement);
+        configuration.getMappedStatement(statement);
+        return this.selectOne(statement, null);
     }
 
     /**
@@ -38,27 +43,12 @@ public class DefaultSqlSession implements SqlSession {
      */
     @Override
     public <T> T selectOne(String statement, Object param)  {
-        try {
-            MappedStatement mappedStatement = configuration.getMappedStatement(statement);
-            Environment environment = configuration.getEnvironment();
-            BoundSql boundSql = mappedStatement.getBoundSql();
-
-            // 创建连接
-            Connection connection = environment.getDataSource().getConnection();
-            // 创建对象
-            PreparedStatement preparedStatement = connection.prepareStatement(boundSql.getSql());
-            preparedStatement.setLong(1, Long.parseLong(((Object[])param)[0].toString()));
-            // 执行sql查询
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<T> res = resultSet2Obj(resultSet, Class.forName(boundSql.getResultType()));
-            if (CollUtil.isEmpty(res)) {
-                return null;
-            }
-            return res.get(0);
-        } catch (Exception e) {
-           e.printStackTrace();
+        MappedStatement mappedStatement = configuration.getMappedStatement(statement);
+        List<T> query = executor.query(mappedStatement, param, Executor.NO_RESULT_HANDLER, mappedStatement.getBoundSql());
+        if (CollUtil.isEmpty(query)) {
+            return null;
         }
-        return null;
+        return query.get(0);
 
     }
 

@@ -25,6 +25,4 @@ public interface TransactionFactory {
      */
     Transaction newTransaction(DataSource date, TransactionIsolationLevel transactionIsolationLevel, boolean autoCommit);
 
-
-
 }

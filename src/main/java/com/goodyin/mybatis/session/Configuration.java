@@ -3,10 +3,17 @@ package com.goodyin.mybatis.session;
 import com.goodyin.mybatis.binding.MapperRegistry;
 import com.goodyin.mybatis.datasource.druid.DruidDataSourceFactory;
 import com.goodyin.mybatis.datasource.pooled.PooledDataSourceFactory;
-import com.goodyin.mybatis.datasource.unpooled.UnPooledDataSource;
 import com.goodyin.mybatis.datasource.unpooled.UnPooledDataSourceFactory;
+import com.goodyin.mybatis.executor.Executor;
+import com.goodyin.mybatis.executor.resultset.DefaultResultSetHandler;
+import com.goodyin.mybatis.executor.resultset.ResultSetHandle;
+import com.goodyin.mybatis.executor.simpleExecutor;
+import com.goodyin.mybatis.executor.statement.PreparedStatementHandler;
+import com.goodyin.mybatis.executor.statement.StatementHandle;
+import com.goodyin.mybatis.mapping.BoundSql;
 import com.goodyin.mybatis.mapping.Environment;
 import com.goodyin.mybatis.mapping.MappedStatement;
+import com.goodyin.mybatis.transaction.Transaction;
 import com.goodyin.mybatis.transaction.jdbc.JdbcTransactionFactory;
 import com.goodyin.mybatis.type.TypeAliasRegistry;
 
@@ -31,6 +38,9 @@ public class Configuration {
      */
     protected final Map<String, MappedStatement> mappedStatements = new HashMap<>();
 
+    /**
+     * 类别名注册
+     */
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
 
     public Configuration() {
@@ -77,5 +87,30 @@ public class Configuration {
     public Configuration setEnvironment(Environment environment) {
         this.environment = environment;
         return this;
+    }
+
+    public ResultSetHandle newResultSetHandler(Executor executor, MappedStatement mappedStatement, BoundSql boundSql) {
+        return new DefaultResultSetHandler(executor, mappedStatement, boundSql);
+    }
+
+
+    /**
+     * 创建语句处理器
+     *
+     * @param executor
+     * @param mappedStatement
+     * @return
+     */
+    public StatementHandle newStatementHandle(Executor executor, MappedStatement mappedStatement, Object parameter, ResultHandler resultHandler, BoundSql boundSql) {
+        return new PreparedStatementHandler(executor, mappedStatement, parameter, resultHandler, boundSql);
+    }
+
+    /**
+     * 生成执行器
+     * @param transaction
+     * @return
+     */
+    public Executor newExecutor(Transaction transaction) {
+        return new simpleExecutor(this, transaction);
     }
 }
